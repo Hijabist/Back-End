@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Firebase Login & Get Token</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  </head>
+  <body>
+    <h2>Login to Get Token</h2>
+    <input id="email" type="email" placeholder="Email" /><br />
+    <input id="password" type="password" placeholder="Password" /><br />
+    <button onclick="login()">Login</button>
+
+    <h3>Token:</h3>
+    <textarea id="token" cols="60" rows="5" readonly></textarea><br />
+    <button onclick="sendToBackend()">Send Token to Backend</button>
+
+    <script>
+      // GANTI dengan konfigurasi Firebase project-mu!
+      const firebaseConfig = {
+        apiKey: "AIzaSyBb5uKbGCN2T3gXnaDori-0aQdijViOYz4",
+        authDomain: "hijabist-web.firebaseapp.com",
+        projectId: "hijabist-web",
+        // ...dll (isi sesuai config Firebase-mu)
+      };
+      firebase.initializeApp(firebaseConfig);
+
+      async function login() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        try {
+          const userCredential = await firebase
+            .auth()
+            .signInWithEmailAndPassword(email, password);
+          const token = await userCredential.user.getIdToken();
+          document.getElementById("token").value = token;
+          alert("Login sukses! Token didapat.");
+        } catch (err) {
+          alert("Login gagal: " + err.message);
+        }
+      }
+
+      async function sendToBackend() {
+        const token = document.getElementById("token").value;
+        if (!token) return alert("Token belum ada!");
+        // Ganti URL sesuai endpoint backend-mu!
+        const res = await fetch("http://localhost:3000/api/user/profile", {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + token,
+          },
+        });
+        const data = await res.json();
+        alert("Respon backend:\n" + JSON.stringify(data, null, 2));
+      }
+    </script>
+  </body>
+</html>
