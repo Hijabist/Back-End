@@ -87,6 +87,7 @@ async function predictSkinTone(req, res) {
         fs.unlinkSync(req.file.path);
       }
     } catch (_) {}
+    
     res.status(500).json({
       error: true,
       message: error.message || "An error occurred during prediction.",
