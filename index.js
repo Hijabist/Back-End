@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Static modeltfjs
-app.use("/modeltfjs", express.static(path.join(__dirname, "../src/modeltfjs")));
+app.use("/modeltfjs", express.static(path.join(__dirname, "./src/modeltfjs")));
 
 // Routes
 app.use("/api/auth", authRoutes);
