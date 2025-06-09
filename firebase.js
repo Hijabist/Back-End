@@ -1,23 +1,56 @@
 const admin = require("firebase-admin");
-const path = require("path");
-const fs = require("fs");
-// Lokasi file JSON service account
-const keyPath = path.join(__dirname, "./myfirebase.json");
+require("dotenv").config(); // Load environment variables
 
 // Inisialisasi hanya jika belum ada app
 if (!admin.apps.length) {
-  const serviceAccount = JSON.parse(fs.readFileSync(keyPath, "utf8"));
+  // Validasi environment variables
+  const requiredEnvVars = [
+    "FIREBASE_PROJECT_ID",
+    "FIREBASE_PRIVATE_KEY_ID",
+    "FIREBASE_PRIVATE_KEY",
+    "FIREBASE_CLIENT_EMAIL",
+    "FIREBASE_CLIENT_ID",
+  ];
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    storageBucket: serviceAccount.project_id + ".appspot.com",
-    // Bisa juga hardcode: storageBucket: "hijabist-web.appspot.com"
-  });
+  const missingVars = requiredEnvVars.filter(
+    (varName) => !process.env[varName]
+  );
 
-  console.log("✅ Firebase initialized via bulogkufile.json");
+  if (missingVars.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missingVars.join(", ")}`
+    );
+  }
+
+  try {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        type: "service_account",
+        project_id: process.env.FIREBASE_PROJECT_ID,
+        private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+        private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+        client_email: process.env.FIREBASE_CLIENT_EMAIL,
+        client_id: process.env.FIREBASE_CLIENT_ID,
+        auth_uri: "https://accounts.google.com/o/oauth2/auth",
+        token_uri: "https://oauth2.googleapis.com/token",
+        auth_provider_x509_cert_url:
+          "https://www.googleapis.com/oauth2/v1/certs",
+        client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
+        universe_domain: "googleapis.com",
+      }),
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+    });
+
+    console.log(
+      "✅ Firebase initialized successfully via environment variables"
+    );
+  } catch (error) {
+    console.error("❌ Firebase initialization failed:", error.message);
+    throw error;
+  }
 }
 
-// Export service
+// Export services
 const db = admin.firestore();
 const auth = admin.auth();
 const bucket = admin.storage().bucket();
