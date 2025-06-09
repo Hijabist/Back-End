@@ -21,7 +21,6 @@ yarn-error.log*
 .env.production.local
 
 # Firebase credentials - JANGAN COMMIT!
-*.json
 myfirebase.json
 firebase.json
 serviceAccountKey.json
