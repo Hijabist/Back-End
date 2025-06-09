@@ -9,7 +9,7 @@ async function loadModel() {
     try {
       // Model harus diakses via URL
       model = await tf.loadGraphModel(
-        "http://localhost:3000/modeltfjs/model.json"
+        "http://localhost:3000/modeltfjs/face-shape/model.json"
       );
       console.log("Model loaded successfully.");
 

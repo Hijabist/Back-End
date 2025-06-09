@@ -2,7 +2,10 @@ const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 const { predict } = require("../../models/tensor/tf-models");
-const { admin, db } = require("../../../firebase.js"); // Import Firestore instance
+const {
+  facePrediction,
+  getUserFacePredictions,
+} = require("../../models/tensor/face-shape.js");
 
 async function predictFaceShape(req, res) {
   if (!req.file) {
@@ -71,45 +74,24 @@ async function predictFaceShape(req, res) {
         hijabRecomendation = { error: "Failed to parse Python output." };
       }
 
-      // ====== SIMPAN / UPDATE KE FIRESTORE ======
+      // ==== SIMPAN/UPDATE KE FIRESTORE MENGGUNAKAN MODELS ====
       try {
-        // Pastikan sudah login (validasi token jalan)
         const userId = req.user && req.user.uid;
         if (!userId) throw new Error("User not authenticated.");
 
-        const predictionsRef = db.collection("predictions");
-        // Cek apakah sudah ada prediksi user ini (boleh pake filter lain, misal tanggal)
-        const snapshot = await predictionsRef
-          .where("uid", "==", userId)
-          .limit(1)
-          .get();
-
-        const predictionData = {
+        await facePrediction({
           uid: userId,
           predicted_face_shape: predictedFaceShape,
           confidence: maxProbability,
           all_probabilities: probabilitiesByClass,
-          raw_prediction: rawOutput,
           hijabRecomendation: hijabRecomendation,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        };
-
-        if (!snapshot.empty) {
-          // Update dokumen prediksi yang sudah ada
-          const docId = snapshot.docs[0].id;
-          await predictionsRef.doc(docId).update(predictionData);
-        } else {
-          // Tambah dokumen prediksi baru
-          predictionData.createdAt =
-            admin.firestore.FieldValue.serverTimestamp();
-          await predictionsRef.add(predictionData);
-        }
+        });
       } catch (e) {
         console.error("Firestore error:", e);
         // Tidak mengganggu response utama
       }
 
-      // ====== END SIMPAN / UPDATE FIRESTORE ======
+      // ==== END ====
 
       res.json({
         error: false,
@@ -119,7 +101,6 @@ async function predictFaceShape(req, res) {
           confidence: (maxProbability * 100).toFixed(2) + "%",
           confidence_raw: maxProbability,
           all_probabilities: probabilitiesByClass,
-          raw_prediction: rawOutput,
           hijabRecomendation: hijabRecomendation,
         },
       });
@@ -140,4 +121,28 @@ async function predictFaceShape(req, res) {
   }
 }
 
-module.exports = { predictFaceShape };
+async function getMyFacePredictions(req, res) {
+  try {
+    const userId = req.user && req.user.uid;
+    if (!userId)
+      return res.status(401).json({
+        error: true,
+        message: "User not authenticated.",
+      });
+
+    const predictions = await getUserFacePredictions(userId);
+
+    res.status(200).json({
+      error: false,
+      message: "Face shape predictions retrieved successfully.",
+      result: predictions,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: true,
+      message:
+        error.message || "An error occurred while retrieving predictions.",
+    });
+  }
+}
+module.exports = { predictFaceShape, getMyFacePredictions };
