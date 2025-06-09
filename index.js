@@ -1,8 +1,8 @@
 const express = require("express");
 const path = require("path");
 
-const authRoutes = require("../src/routes/auth/authRoutes.js");
-const faceShapeRoutes = require("../src/routes/predict/face-shape-routes.js");
+const authRoutes = require("./src/routes/auth/authRoutes.js");
+const faceShapeRoutes = require("./src/routes/predict/face-shape-routes.js");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
