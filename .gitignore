@@ -1,3 +1,7 @@
 node_modules/
 .env
 test-mongo.js
+firebase.json
+src/modeltfjs/
+uploads/
+mail.html
