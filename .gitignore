@@ -1,7 +1,6 @@
 node_modules/
 test-mongo.js
 firebase.json
-src/modeltfjs/
 uploads/
 mail.html
 
