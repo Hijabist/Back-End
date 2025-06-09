@@ -2,6 +2,7 @@ const { spawn } = require("child_process");
 const path = require("path");
 const fs = require("fs");
 const { predict } = require("../../models/tensor/tf-models");
+const { admin, db } = require("../../../firebase.js"); // Import Firestore instance
 
 async function predictFaceShape(req, res) {
   if (!req.file) {
@@ -61,7 +62,7 @@ async function predictFaceShape(req, res) {
       console.error(`Python error: ${data}`);
     });
 
-    pythonProcess.on("close", (code) => {
+    pythonProcess.on("close", async (code) => {
       let hijabRecomendation = {};
       try {
         hijabRecomendation = JSON.parse(pythonOutput);
@@ -69,6 +70,46 @@ async function predictFaceShape(req, res) {
         console.error("Error parsing Python output:", error);
         hijabRecomendation = { error: "Failed to parse Python output." };
       }
+
+      // ====== SIMPAN / UPDATE KE FIRESTORE ======
+      try {
+        // Pastikan sudah login (validasi token jalan)
+        const userId = req.user && req.user.uid;
+        if (!userId) throw new Error("User not authenticated.");
+
+        const predictionsRef = db.collection("predictions");
+        // Cek apakah sudah ada prediksi user ini (boleh pake filter lain, misal tanggal)
+        const snapshot = await predictionsRef
+          .where("uid", "==", userId)
+          .limit(1)
+          .get();
+
+        const predictionData = {
+          uid: userId,
+          predicted_face_shape: predictedFaceShape,
+          confidence: maxProbability,
+          all_probabilities: probabilitiesByClass,
+          raw_prediction: rawOutput,
+          hijabRecomendation: hijabRecomendation,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        };
+
+        if (!snapshot.empty) {
+          // Update dokumen prediksi yang sudah ada
+          const docId = snapshot.docs[0].id;
+          await predictionsRef.doc(docId).update(predictionData);
+        } else {
+          // Tambah dokumen prediksi baru
+          predictionData.createdAt =
+            admin.firestore.FieldValue.serverTimestamp();
+          await predictionsRef.add(predictionData);
+        }
+      } catch (e) {
+        console.error("Firestore error:", e);
+        // Tidak mengganggu response utama
+      }
+
+      // ====== END SIMPAN / UPDATE FIRESTORE ======
 
       res.json({
         error: false,
