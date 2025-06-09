@@ -12,7 +12,7 @@ const {
 } = require("../../controllers/tensor/skin-tone-controllers.js");
 
 const router = express.Router();
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ dest: "temp/" });
 
 router.post(
   "/face-shape",
