@@ -7,7 +7,7 @@ const {
 const { exp } = require("@tensorflow/tfjs");
 
 const router = express.Router();
-const upload = multer({ dest: "temp/" }); // Temp folder for uploaded images
+const upload = multer({ dest: "/tmp" }); // Temp folder for uploaded images
 
 router.post(
   "/skin-tone",
