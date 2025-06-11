@@ -20,7 +20,7 @@ async function predictSkinTone(req, res) {
     const result = await predict(imageBuffer);
 
     // Skin tone classes (samakan dengan model kamu)
-    const skinToneClasses = ["dark", "mid_dark", "mid_light", "light"];
+    const skinToneClasses = ["dark", "light", "mid_dark", "mid_light"];
     let maxProbability = 0;
     let predictedSkinTone = "";
     result.forEach((prob, idx) => {
@@ -62,6 +62,7 @@ async function predictSkinTone(req, res) {
 
         await skinTonePrediction({
           uid: userId,
+          skin_tone: predictedSkinTone,
           color_recommendation: recommendation,
         });
 
@@ -87,7 +88,7 @@ async function predictSkinTone(req, res) {
         fs.unlinkSync(req.file.path);
       }
     } catch (_) {}
-    
+
     res.status(500).json({
       error: true,
       message: error.message || "An error occurred during prediction.",
