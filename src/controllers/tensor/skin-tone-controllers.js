@@ -62,7 +62,6 @@ async function predictSkinTone(req, res) {
 
         await skinTonePrediction({
           uid: userId,
-          skin_tone: predictedSkinTone,
           color_recommendation: recommendation,
         });
 
