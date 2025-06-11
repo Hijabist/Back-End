@@ -70,6 +70,7 @@ async function predictSkinTone(req, res) {
         return res.json({
           error: false,
           message: "Skin tone prediction successful.",
+          skinTone: predictedSkinTone,
           result: {
             color_recommendation: recommendation,
           },
