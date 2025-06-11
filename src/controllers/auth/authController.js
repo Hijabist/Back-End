@@ -52,7 +52,7 @@ async function getUserProfileDetails(req, res) {
     const faceShape = await userModel.getFaceShapeByUid(uid);
     const skinTone = await userModel.getSkinToneByUid(uid);
 
-    if (!user || !faceShape || !skinTone) {
+    if (!user) {
       return res.status(404).json({
         error: "true",
         message: "User not found.",
