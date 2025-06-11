@@ -20,7 +20,7 @@ async function predictSkinTone(req, res) {
     const result = await predict(imageBuffer);
 
     // Skin tone classes (samakan dengan model kamu)
-    const skinToneClasses = ["dark", "light", "mid_dark", "mid_light"];
+    const skinToneClasses = ["dark", "light", "mid dark", "mid light"];
     let maxProbability = 0;
     let predictedSkinTone = "";
     result.forEach((prob, idx) => {
