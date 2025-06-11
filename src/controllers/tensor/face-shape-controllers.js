@@ -21,7 +21,7 @@ async function predictFaceShape(req, res) {
 
     // 2. Prediksi face shape
     const rawOutput = await predict(imageBuffer);
-    const faceShapeClasses = ["round", "heart", "square", "oblong", "oval"];
+    const faceShapeClasses = ["Heart", "Oblong", "Oval", "Round", "Square"];
 
     // 3. Cari kelas dengan probabilitas tertinggi
     let maxProbability = 0;
