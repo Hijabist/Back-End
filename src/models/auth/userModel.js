@@ -11,13 +11,22 @@ async function getUserByUid(uid) {
 }
 
 async function getFaceShapeByUid(uid) {
-  const faceShapeDoc = await db.collection("face-shape").doc(uid).get();
-  return faceShapeDoc.exists ? faceShapeDoc.data() : null;
+  const snapshot = await db
+    .collection("face-shape")
+    .where("uid", "==", uid)
+    .get();
+  if (snapshot.empty) return null;
+  // Kalau cuma mau satu, ambil yang pertama:
+  return snapshot.docs[0].data();
 }
 
 async function getSkinToneByUid(uid) {
-  const skinToneDoc = await db.collection("skin-tone").doc(uid).get();
-  return skinToneDoc.exists ? skinToneDoc.data() : null;
+  const snapshot = await db
+    .collection("skin-tone")
+    .where("uid", "==", uid)
+    .get();
+  if (snapshot.empty) return null;
+  return snapshot.docs[0].data();
 }
 
 module.exports = {
