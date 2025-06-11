@@ -45,11 +45,14 @@ async function registerUser(req, res) {
   }
 }
 
-async function getUserProfile(req, res) {
+async function getUserProfileDetails(req, res) {
   const uid = req.user.uid;
   try {
     const user = await userModel.getUserByUid(uid);
-    if (!user) {
+    const faceShape = await userModel.getFaceShapeByUid(uid);
+    const skinTone = await userModel.getSkinToneByUid(uid);
+
+    if (!user || !faceShape || !skinTone) {
       return res.status(404).json({
         error: "true",
         message: "User not found.",
@@ -58,6 +61,8 @@ async function getUserProfile(req, res) {
     return res.status(200).json({
       error: "false",
       user,
+      faceShape,
+      skinTone,
     });
   } catch (error) {
     return res.status(500).json({
@@ -67,4 +72,4 @@ async function getUserProfile(req, res) {
   }
 }
 
-module.exports = { registerUser, getUserProfile };
+module.exports = { registerUser, getUserProfileDetails };
