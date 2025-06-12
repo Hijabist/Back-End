@@ -8,7 +8,7 @@ async function loadModel() {
   if (!model) {
     try {
       model = await tf.loadGraphModel(
-        "https://back-end-production-f224.up.railway.app/modeltfjs/face-shape/model.json"
+        "https://back-end-production-f224.up.railway.app/modeltfjs/skin-tone/model.json"
       );
       console.log("Skin-tone model loaded successfully.");
       console.log("Model inputs:", model.inputs);
